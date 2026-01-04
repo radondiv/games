@@ -5,65 +5,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-  <title>Neon Hover Racer 3D — for Parichay</title>
+  <title>Neon Hover Racer PRO — Laptop Edition (for Parichay)</title>
   <style>
     :root {
-      --bg: #05060f;
-      --ui: #0c1022;
-      --text: #eaf2ff;
-      --accent: #67e8f9;
-      --accent2: #a78bfa;
-      --danger: #ef4444;
-      --good: #22c55e;
+      --bg: #05060f; --text: #eaf2ff; --ui: #0c1022; --accent: #67e8f9; --accent2: #a78bfa; --danger:#ef4444; --good:#22c55e;
     }
     html, body { height: 100%; }
-    body {
-      margin: 0; background: radial-gradient(1200px 900px at 15% 10%, #0a0e25, var(--bg));
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
-      color: var(--text);
-      overflow: hidden;
-    }
-    #app { position: fixed; inset: 0; display: grid; grid-template-rows: auto 1fr auto; }
-    #hud {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 14px; background: linear-gradient(90deg, rgba(167,139,250,0.15), rgba(103,232,249,0.12));
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .stats { display: flex; gap: 10px; flex-wrap: wrap; font-weight: 700; }
-    .badge { padding: 6px 10px; border-radius: 999px; background: rgba(12,16,34,0.7); border: 1px solid rgba(255,255,255,0.15); }
-    .badge.good { border-color: rgba(34,197,94,0.6); }
-    .badge.danger { border-color: rgba(239,68,68,0.6); }
-
+    body { margin:0; background: radial-gradient(1200px 900px at 15% 10%, #0a0e25, var(--bg)); color:var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; overflow:hidden; }
+    #app { position:fixed; inset:0; display:grid; grid-template-rows: auto 1fr auto; }
+    #hud { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:linear-gradient(90deg, rgba(167,139,250,0.12), rgba(103,232,249,0.10)); border-bottom:1px solid rgba(255,255,255,0.10); }
+    .stats { display:flex; gap:10px; flex-wrap:wrap; font-weight:800; }
+    .badge { padding:6px 10px; border-radius:999px; background:rgba(12,16,34,0.6); border:1px solid rgba(255,255,255,0.12); }
     #canvas { display:block; width:100%; height:100%; }
-
     #overlay { position:absolute; inset:0; display:grid; place-items:center; pointer-events:auto; }
-    .panel {
-      max-width: 780px; width: min(94vw, 780px);
-      background: rgba(12,16,34,0.85); border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 16px; padding: 18px 20px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
-      text-align: center;
-    }
-    .panel h1 { margin: 4px 0 6px; font-size: clamp(22px, 4vw, 28px); }
-    .panel p { margin: 8px 0; opacity: 0.9; }
-    .actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 12px; }
-    button {
-      padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
-      color: var(--text); background: linear-gradient(180deg, rgba(103,232,249,0.25), rgba(167,139,250,0.25));
-      cursor: pointer; font-weight: 800; letter-spacing: 0.2px;
-    }
-    button.primary { background: linear-gradient(180deg, rgba(103,232,249,0.5), rgba(167,139,250,0.5)); }
+    .panel { max-width:900px; width:min(96vw, 900px); background:rgba(12,16,34,0.88); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:18px 20px; box-shadow:0 20px 50px rgba(0,0,0,0.45); text-align:center; }
+    .panel h1 { margin:6px 0; font-size: clamp(24px, 4vw, 32px); }
+    .panel p { opacity:0.9; }
+    .actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:12px; }
+    button { padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); color:var(--text); background:linear-gradient(180deg, rgba(103,232,249,0.25), rgba(167,139,250,0.25)); cursor:pointer; font-weight:800; letter-spacing:0.2px; }
+    button.primary { background:linear-gradient(180deg, rgba(103,232,249,0.5), rgba(167,139,250,0.5)); }
+    #footer { padding:8px 14px; font-size:12px; opacity:0.85; background:rgba(12,16,34,0.4); }
 
-    #footer { padding: 8px 14px; font-size: 12px; opacity: 0.85; background: rgba(12,16,34,0.4); }
+    #gfxPanel { position:absolute; top:72px; right:14px; width:300px; background:rgba(12,16,34,0.9); border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:12px; display:none; }
+    #gfxPanel h3 { margin:4px 0 8px; }
+    .row { display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0; }
+    input[type=range] { width: 140px; }
+    label.switch { display:flex; align-items:center; gap:8px; }
 
-    .settings { display:flex; gap:10px; align-items:center; }
-    .switch { display:flex; gap:8px; align-items:center; padding:6px 10px; border-radius: 999px; background: rgba(12,16,34,0.6); border:1px solid rgba(255,255,255,0.12); }
-    .switch input { accent-color: #67e8f9; }
-
-    /* Mobile controls */
-    #mobileCtrls { position: absolute; inset:auto 0 14px 0; display:flex; justify-content:center; gap:10px; }
-    .ctl { width: 90px; height: 90px; display:grid; place-items:center; border-radius: 14px; background: rgba(12,16,34,0.7); border: 1px solid rgba(255,255,255,0.12); font-weight: 900; }
-    @media (min-width: 720px) { #mobileCtrls { display:none; } }
+    #mobileCtrls { position:absolute; inset:auto 0 14px 0; display:flex; justify-content:center; gap:10px; }
+    .ctl { width: 90px; height: 90px; display:grid; place-items:center; border-radius:14px; background:rgba(12,16,34,0.7); border:1px solid rgba(255,255,255,0.12); font-weight:900; }
+    @media (min-width: 900px) { #mobileCtrls { display:none; } }
   </style>
 </head>
 <body>
@@ -73,13 +44,13 @@
         <span class="badge" id="score">Score: 0</span>
         <span class="badge" id="speed">Speed: 0</span>
         <span class="badge" id="best">Best: 0</span>
+        <span class="badge" id="pos">Position: 1/4</span>
         <span class="badge" id="fps">FPS: 0</span>
       </div>
-      <div class="settings">
-        <label class="switch"><input type="checkbox" id="bloomToggle" checked/> Bloom</label>
-        <label class="switch"><input type="checkbox" id="musicToggle" checked/> Music</label>
+      <div class="stats">
         <button id="pauseBtn">⏸️ Pause (P)</button>
         <button id="resetBtn">🔄 Reset</button>
+        <button id="gfxBtn">🎛️ Graphics (G)</button>
       </div>
     </div>
     <canvas id="canvas" aria-label="3D Game"></canvas>
@@ -88,11 +59,22 @@
       <div class="ctl" data-act="boost">⚡</div>
       <div class="ctl" data-act="right">➡️</div>
     </div>
+
+    <div id="gfxPanel" class="panel">
+      <h3>Graphics Settings</h3>
+      <div class="row"><label>Bloom</label><input type="range" id="bloomStrength" min="0" max="1.6" step="0.05" value="1.0" /></div>
+      <div class="row"><label>Motion Blur</label><input type="range" id="blurStrength" min="0" max="0.99" step="0.01" value="0.86" /></div>
+      <div class="row"><label>SSAO</label><input type="checkbox" id="ssaoToggle" checked/></div>
+      <div class="row"><label>Tone Mapping</label><select id="toneSelect"><option value="ACES">ACES</option><option value="Reinhard">Reinhard</option><option value="Cineon">Cineon</option></select></div>
+      <div class="row"><label>Quality</label><select id="qualitySelect"><option value="ultra">Ultra</option><option value="high" selected>High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
+      <div class="actions"><button id="closeGfx">Close</button></div>
+    </div>
+
     <div id="overlay">
       <div class="panel" id="startPanel">
-        <h1>Neon Hover Racer 3D</h1>
-        <p>Steer a neon hovercraft through a procedural track, dodge obstacles, hit gates to score, and boost to survive. The track speeds up as you progress. 🌌</p>
-        <p><strong>Controls:</strong> A/D or ◀/▶ steer • Space = Boost • Shift = Brake • P = Pause • C = Camera</p>
+        <h1>Neon Hover Racer PRO — Laptop Edition</h1>
+        <p>High-end 3D hover racing with dynamic lighting, HDR environment, bloom, motion blur, SSAO, AI opponents, and adaptive quality for smooth laptop play.</p>
+        <p><strong>Controls:</strong> A/D or ◀/▶ steer • Space = Boost • Shift = Brake • P = Pause • C = Camera • G = Graphics Panel</p>
         <div class="actions">
           <button id="playBtn" class="primary">Play</button>
           <button id="howBtn">How to Play</button>
@@ -106,366 +88,272 @@
         </div>
       </div>
       <div class="panel" id="gameOverPanel" style="display:none;">
-        <h1>Game Over</h1>
+        <h1>Race Over</h1>
         <p id="finalScore">Score: 0</p>
+        <p id="finalPos">Position: 1/4</p>
         <div class="actions">
           <button id="retryBtn" class="primary">Retry</button>
           <button id="shareBtn">Share</button>
         </div>
       </div>
     </div>
-    <div id="footer">Tip: Skim near gates to chain boosts. Your best score is saved locally.</div>
+    <div id="footer">Tip: Hit neon gates to chain boosts. Graphics panel (G) lets you tune visuals for your laptop.</div>
   </div>
 
-  <!-- High-end 3D: Three.js + Bloom post-processing (CDN imports) -->
+  <!-- Three.js + advanced passes (CDN) -->
   <script type="module">
     import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
     import { EffectComposer } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js';
     import { RenderPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/RenderPass.js';
     import { UnrealBloomPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+    import { SSAOPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/SSAOPass.js';
+    import { SMAAPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/SMAAPass.js';
+    import { AfterimagePass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/AfterimagePass.js';
+    import { RGBELoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/RGBELoader.js';
 
-    // ---- Globals & UI ----
+    // ---- UI refs ----
     const canvas = document.getElementById('canvas');
-    const scoreEl = document.getElementById('score');
-    const speedEl = document.getElementById('speed');
-    const bestEl = document.getElementById('best');
-    const fpsEl = document.getElementById('fps');
     const overlay = document.getElementById('overlay');
     const startPanel = document.getElementById('startPanel');
     const pausePanel = document.getElementById('pausePanel');
     const gameOverPanel = document.getElementById('gameOverPanel');
-
-    const bloomToggle = document.getElementById('bloomToggle');
-    const musicToggle = document.getElementById('musicToggle');
-    const pauseBtn = document.getElementById('pauseBtn');
-    const resetBtn = document.getElementById('resetBtn');
     const playBtn = document.getElementById('playBtn');
     const resumeBtn = document.getElementById('resumeBtn');
     const retryBtn = document.getElementById('retryBtn');
     const shareBtn = document.getElementById('shareBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const howBtn = document.getElementById('howBtn');
+    const gfxBtn = document.getElementById('gfxBtn');
+    const closeGfx = document.getElementById('closeGfx');
 
-    let best = parseFloat(localStorage.getItem('neon_hover_best')||'0');
+    const scoreEl = document.getElementById('score');
+    const speedEl = document.getElementById('speed');
+    const bestEl = document.getElementById('best');
+    const posEl = document.getElementById('pos');
+    const fpsEl = document.getElementById('fps');
+
+    const bloomStrength = document.getElementById('bloomStrength');
+    const blurStrength = document.getElementById('blurStrength');
+    const ssaoToggle = document.getElementById('ssaoToggle');
+    const toneSelect = document.getElementById('toneSelect');
+    const qualitySelect = document.getElementById('qualitySelect');
+    const gfxPanel = document.getElementById('gfxPanel');
+
+    let best = parseFloat(localStorage.getItem('neon_hover_best_pro')||'0');
     bestEl.textContent = `Best: ${best.toFixed(1)}`;
 
-    // ---- Scene ----
+    // ---- Renderer / Scene ----
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x05060f);
 
-    const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 3.2, 6.5);
+    const camera = new THREE.PerspectiveCamera(72, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 3.2, 7.5);
+
+    // HDR environment for PBR
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    new RGBELoader().setDataType(THREE.UnsignedByteType)
+      .load('https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/royal_esplanade_1k.hdr', (tex) => {
+        const envMap = pmrem.fromEquirectangular(tex).texture;
+        scene.environment = envMap; tex.dispose(); pmrem.dispose();
+      });
 
     // Lights
-    const hemi = new THREE.HemisphereLight(0xa1e1ff, 0x0a0e25, 0.9);
-    scene.add(hemi);
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
-    dirLight.position.set(5, 10, 7);
-    scene.add(dirLight);
+    const hemi = new THREE.HemisphereLight(0xa1e1ff, 0x0a0e25, 1.0); scene.add(hemi);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.7); dirLight.position.set(6, 12, 6); scene.add(dirLight);
 
-    // Post-processing (Bloom)
+    // Post-processing
     const composer = new EffectComposer(renderer);
-    const renderPass = new RenderPass(scene, camera);
-    composer.addPass(renderPass);
-    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.9, 0.4, 0.85);
-    composer.addPass(bloomPass);
+    const renderPass = new RenderPass(scene, camera); composer.addPass(renderPass);
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.0, 0.4, 0.85); composer.addPass(bloomPass);
+    const ssaoPass = new SSAOPass(scene, camera, window.innerWidth, window.innerHeight); ssaoPass.kernelRadius = 16; ssaoPass.minDistance = 0.005; ssaoPass.maxDistance = 0.2; composer.addPass(ssaoPass);
+    const smaaPass = new SMAAPass(window.innerWidth, window.innerHeight); composer.addPass(smaaPass);
+    const afterPass = new AfterimagePass(0.86); composer.addPass(afterPass);
 
-    function setBloomEnabled(enabled) {
-      bloomPass.enabled = !!enabled;
+    function applyToneMapping(mode){
+      renderer.toneMapping = mode==='ACES'?THREE.ACESFilmicToneMapping : mode==='Reinhard'?THREE.ReinhardToneMapping : THREE.CineonToneMapping;
     }
 
-    // Resize
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
+    function resize(){
+      camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       composer.setSize(window.innerWidth, window.innerHeight);
-    });
+    }
+    window.addEventListener('resize', resize);
 
-    // ---- Track & Environment ----
+    // ---- Track ----
     const trackGroup = new THREE.Group(); scene.add(trackGroup);
     const obstacleGroup = new THREE.Group(); scene.add(obstacleGroup);
     const gateGroup = new THREE.Group(); scene.add(gateGroup);
 
-    const trackWidth = 6; // x
-    const segmentDepth = 24; // z length per segment
-    const visibleSegments = 6;
+    const trackWidth = 7.2; const segmentDepth = 26; const visibleSegments = 7;
+    const matRoad = new THREE.MeshStandardMaterial({ color: 0x111633, metalness: 0.1, roughness: 0.85 });
+    const matStripe = new THREE.MeshStandardMaterial({ color: 0x67e8f9, emissive: 0x0a1a2a, emissiveIntensity: 1.8, metalness: 0.6, roughness: 0.2 });
 
-    const matRoad = new THREE.MeshStandardMaterial({ color: 0x0f1430, metalness: 0.2, roughness: 0.9 });
-    const matStripe = new THREE.MeshBasicMaterial({ color: 0x67e8f9 });
-
-    const stripeGeo = new THREE.BoxGeometry(trackWidth, 0.02, 0.3);
-
-    function makeSegment(zStart) {
+    const stripeGeo = new THREE.BoxGeometry(trackWidth, 0.02, 0.35);
+    const segments = [];
+    function makeSegment(zStart){
       const g = new THREE.Group();
       const geom = new THREE.BoxGeometry(trackWidth, 0.2, segmentDepth);
-      const road = new THREE.Mesh(geom, matRoad);
-      road.position.set(0, 0, zStart);
-      g.add(road);
-      // neon edge stripes
-      const s1 = new THREE.Mesh(stripeGeo, matStripe);
-      s1.position.set(-trackWidth/2 + 0.15, 0.12, zStart - segmentDepth/2 + 0.3);
-      const s2 = s1.clone(); s2.position.x = trackWidth/2 - 0.15;
-      g.add(s1); g.add(s2);
+      const road = new THREE.Mesh(geom, matRoad); road.position.set(0, 0, zStart); g.add(road);
+      const s1 = new THREE.Mesh(stripeGeo, matStripe); s1.position.set(-trackWidth/2 + 0.15, 0.12, zStart - segmentDepth/2 + 0.35);
+      const s2 = s1.clone(); s2.position.x = trackWidth/2 - 0.15; g.add(s1); g.add(s2);
       return g;
     }
+    function initTrack(){ trackGroup.clear(); segments.length = 0; for(let i=0;i<visibleSegments;i++){ const seg = makeSegment(-i*segmentDepth); segments.push(seg); trackGroup.add(seg); } }
 
-    const segments = [];
-    function initTrack() {
-      trackGroup.clear(); segments.length = 0;
-      for (let i=0;i<visibleSegments;i++) {
-        const seg = makeSegment(-i * segmentDepth);
-        segments.push(seg);
-        trackGroup.add(seg);
-      }
+    // Gates & Obstacles
+    const gateMat = new THREE.MeshStandardMaterial({ color: 0xa78bfa, emissive: 0x281e5a, emissiveIntensity: 2.0, metalness: 0.7, roughness: 0.2 });
+    const gateGeo = new THREE.TorusGeometry(1.3, 0.09, 18, 72);
+    const obstacleGeo = new THREE.TetrahedronGeometry(0.95, 1);
+    const obstacleMat = new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0x220000, emissiveIntensity: 1.2, metalness: 0.5, roughness: 0.35 });
+
+    function spawnGate(z){ const g = new THREE.Mesh(gateGeo, gateMat); g.position.set((Math.random()*0.7-0.35)*trackWidth, 1.0, z); g.rotation.x = Math.PI/2; gateGroup.add(g); return g; }
+    function spawnObstacle(z){ const m = new THREE.Mesh(obstacleGeo, obstacleMat); m.position.set((Math.random()*0.7-0.35)*trackWidth, 0.6, z); m.userData.phase = Math.random()*Math.PI*2; obstacleGroup.add(m); return m; }
+
+    function regenDecor(){ obstacleGroup.clear(); gateGroup.clear(); for(let i=0;i<visibleSegments;i++){ const z = -i*segmentDepth; if(i%2===0) spawnGate(z - segmentDepth*0.5); if(i%2===1) spawnObstacle(z - segmentDepth*0.5); } }
+
+    // ---- Player & Bots ----
+    function makeCraft(color){
+      const hull = new THREE.Mesh(new THREE.ConeGeometry(0.7, 1.6, 10), new THREE.MeshStandardMaterial({ color, metalness: 0.75, roughness: 0.25, emissive: 0x0a1a2a, emissiveIntensity: 1.0 })); hull.rotation.z = Math.PI; hull.position.set(0, 0.95, 2.8);
+      const aura = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.2, 32), new THREE.MeshBasicMaterial({ color: 0x67e8f9, side: THREE.DoubleSide })); aura.rotation.x = Math.PI/2; aura.position.y = 0.02; hull.add(aura);
+      return { obj: hull, aura, speed: 6.0, boost: 0, steer: 0, alive: true, score: 0, ai: false, lane: 0 };
     }
+    const player = makeCraft(0x67e8f9); scene.add(player.obj);
 
-    // Gates (score) & Obstacles
-    const gateMat = new THREE.MeshBasicMaterial({ color: 0xa78bfa });
-    const gateGeo = new THREE.TorusGeometry(1.2, 0.08, 16, 64);
-    const obstacleGeo = new THREE.BoxGeometry(0.9, 0.9, 0.9);
-    const obstacleMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.4, roughness: 0.3, emissive: 0x220000, emissiveIntensity: 0.4 });
-
-    function spawnGate(z) {
-      const gate = new THREE.Mesh(gateGeo, gateMat);
-      gate.position.set((Math.random()*0.6-0.3)*trackWidth, 1.0, z);
-      gate.rotation.x = Math.PI/2; gate.userData.type = 'gate';
-      gateGroup.add(gate);
-      return gate;
-    }
-    function spawnObstacle(z) {
-      const m = new THREE.Mesh(obstacleGeo, obstacleMat);
-      m.position.set((Math.random()*0.6-0.3)*trackWidth, 0.5, z);
-      m.userData.type = 'obstacle';
-      m.userData.phase = Math.random()*Math.PI*2; // sway animation
-      obstacleGroup.add(m);
-      return m;
-    }
-
-    // Populate initial gates/obstacles
-    function regenDecor() {
-      obstacleGroup.clear(); gateGroup.clear();
-      for (let i=0;i<visibleSegments;i++) {
-        const z = -i * segmentDepth;
-        if (i%2===0) spawnGate(z - segmentDepth*0.5);
-        if (i%2===1) spawnObstacle(z - segmentDepth*0.5);
-      }
-    }
-
-    // ---- Player ----
-    const craftGeo = new THREE.ConeGeometry(0.7, 1.6, 6);
-    const craftMat = new THREE.MeshStandardMaterial({ color: 0x67e8f9, metalness: 0.7, roughness: 0.2, emissive: 0x081a20, emissiveIntensity: 0.8 });
-    const craft = new THREE.Mesh(craftGeo, craftMat);
-    craft.rotation.z = Math.PI; // nose forward
-    craft.position.set(0, 0.9, 2.5);
-    scene.add(craft);
-
-    const auraGeo = new THREE.RingGeometry(0.9, 1.2, 32);
-    const auraMat = new THREE.MeshBasicMaterial({ color: 0x67e8f9, side: THREE.DoubleSide });
-    const aura = new THREE.Mesh(auraGeo, auraMat);
-    aura.rotation.x = Math.PI/2; aura.position.y = 0.02; craft.add(aura);
+    const bots = [ makeCraft(0x22c55e), makeCraft(0xf59e0b), makeCraft(0x3b82f6) ];
+    bots.forEach((b,i)=>{ b.ai = true; b.obj.position.x = (i-1)*2.2; b.obj.position.z = 3.5 + i*0.5; scene.add(b.obj); });
 
     // Camera modes
     let camMode = 0; // 0 chase, 1 cockpit
-    function updateCamera() {
-      if (camMode===0) {
-        camera.position.lerp(new THREE.Vector3(craft.position.x*0.5, 3.2, 6.5), 0.2);
-        camera.lookAt(craft.position.x, 0.6, craft.position.z - 4);
-      } else {
-        camera.position.lerp(new THREE.Vector3(craft.position.x, 1.5, 2.0), 0.3);
-        camera.lookAt(craft.position.x, 1.2, craft.position.z - 3);
-      }
-    }
+    function updateCamera(){ if(camMode===0){ camera.position.lerp(new THREE.Vector3(player.obj.position.x*0.5, 3.2, 7.5), 0.15); camera.lookAt(player.obj.position.x, 0.8, player.obj.position.z - 4); } else { camera.position.lerp(new THREE.Vector3(player.obj.position.x, 1.5, 2.2), 0.25); camera.lookAt(player.obj.position.x, 1.2, player.obj.position.z - 3); } }
 
-    // ---- Game State ----
-    let running = false;
-    let paused = false;
-    let score = 0;
-    let speed = 6.0;     // forward speed (Z)
-    let maxSpeed = 22.0; // clamp
-    let steer = 0;       // input -1..1
-    let boost = 0;       // boost charge 0..1
-    let time = 0;        // sec
+    // ---- State ----
+    let running=false, paused=false, time=0; let position=1; let difficulty=1.0; let maxSpeed=26.0;
 
-    function resetGame() {
-      running = false; paused = false; score = 0; speed = 6.0; boost = 0; time = 0;
-      craft.position.set(0, 0.9, 2.5);
-      initTrack(); regenDecor();
-      updateHUD();
-    }
+    function resetGame(){ running=false; paused=false; time=0; position=1; difficulty=1.0; player.speed=6.0; player.boost=0; player.score=0; player.obj.position.set(0,0.95,2.8); bots.forEach((b,i)=>{ b.speed=5.8+i*0.2; b.boost=0; b.score=0; b.obj.position.set((i-1)*2.2,0.95,3.5+i*0.5); b.alive=true; }); initTrack(); regenDecor(); updateHUD(); overlay.style.pointerEvents='auto'; startPanel.style.display='block'; pausePanel.style.display='none'; gameOverPanel.style.display='none'; }
+    function startGame(){ resetGame(); running=true; paused=false; overlay.style.pointerEvents='none'; startPanel.style.display='none'; }
+    function raceOver(){ running=false; paused=false; overlay.style.pointerEvents='auto'; gameOverPanel.style.display='block'; document.getElementById('finalScore').textContent = `Score: ${player.score.toFixed(1)}`; document.getElementById('finalPos').textContent = `Position: ${position}/4`; if(player.score>best){ best=player.score; localStorage.setItem('neon_hover_best_pro', String(best)); } bestEl.textContent = `Best: ${best.toFixed(1)}`; }
 
-    function startGame() {
-      resetGame();
-      running = true; paused = false;
-      overlay.style.pointerEvents = 'none';
-      startPanel.style.display = 'none';
-      pausePanel.style.display = 'none';
-      gameOverPanel.style.display = 'none';
-    }
+    function updateHUD(){ scoreEl.textContent=`Score: ${player.score.toFixed(1)}`; speedEl.textContent=`Speed: ${player.speed.toFixed(1)}`; posEl.textContent=`Position: ${position}/4`; }
 
-    function gameOver() {
-      running = false; paused = false;
-      overlay.style.pointerEvents = 'auto';
-      gameOverPanel.style.display = 'block';
-      document.getElementById('finalScore').textContent = `Score: ${score.toFixed(1)}`;
-      if (score > best) { best = score; localStorage.setItem('neon_hover_best', String(best)); }
-      bestEl.textContent = `Best: ${best.toFixed(1)}`;
-    }
-
-    function pauseGame() { if (!running) return; paused = true; overlay.style.pointerEvents = 'auto'; pausePanel.style.display = 'block'; }
-    function resumeGame() { paused = false; overlay.style.pointerEvents = 'none'; pausePanel.style.display = 'none'; }
-
-    function updateHUD() {
-      scoreEl.textContent = `Score: ${score.toFixed(1)}`;
-      speedEl.textContent = `Speed: ${speed.toFixed(1)}`;
-      bestEl.textContent = `Best: ${best.toFixed(1)}`;
-    }
-
-    // ---- Inputs ----
+    // ---- Input ----
     const keys = new Set();
-    window.addEventListener('keydown', (e) => {
-      keys.add(e.key.toLowerCase());
-      if (e.key.toLowerCase()==='p') { paused?resumeGame():pauseGame(); }
-      if (e.key.toLowerCase()==='c') { camMode = (camMode+1)%2; }
+    window.addEventListener('keydown', (e)=>{ const k=e.key.toLowerCase(); keys.add(k); if(k==='p'){ paused?resumeGame():pauseGame(); } if(k==='c'){ camMode=(camMode+1)%2; } if(k==='g'){ gfxPanel.style.display = (gfxPanel.style.display==='none'||!gfxPanel.style.display)?'block':'none'; }
     });
-    window.addEventListener('keyup', (e) => { keys.delete(e.key.toLowerCase()); });
+    window.addEventListener('keyup', (e)=>{ keys.delete(e.key.toLowerCase()); });
 
-    document.querySelectorAll('#mobileCtrls .ctl').forEach(btn => {
-      btn.addEventListener('touchstart', () => {
-        const act = btn.getAttribute('data-act');
-        if (act==='left') keys.add('arrowleft');
-        if (act==='right') keys.add('arrowright');
-        if (act==='boost') keys.add(' ');
-      }, {passive:true});
-      btn.addEventListener('touchend', () => {
-        keys.delete('arrowleft'); keys.delete('arrowright'); keys.delete(' ');
-      }, {passive:true});
+    document.querySelectorAll('#mobileCtrls .ctl').forEach(btn=>{ btn.addEventListener('touchstart',()=>{ const act=btn.getAttribute('data-act'); if(act==='left') keys.add('arrowleft'); if(act==='right') keys.add('arrowright'); if(act==='boost') keys.add(' '); },{passive:true}); btn.addEventListener('touchend',()=>{ keys.delete('arrowleft'); keys.delete('arrowright'); keys.delete(' '); },{passive:true}); });
+
+    playBtn.addEventListener('click', startGame); resumeBtn.addEventListener('click', resumeGame); retryBtn.addEventListener('click', startGame);
+    pauseBtn.addEventListener('click', ()=> paused?resumeGame():pauseGame()); resetBtn.addEventListener('click', ()=> resetGame());
+    shareBtn.addEventListener('click', async ()=>{ const text = `I finished Neon Hover Racer PRO in position ${position}/4 with score ${player.score.toFixed(1)}!`; if(navigator.share){ try{ await navigator.share({ text, title:'Neon Hover Racer PRO' }); }catch(e){} } else { navigator.clipboard?.writeText(text); alert('Copied: '+text); } });
+    howBtn.addEventListener('click', ()=> alert('Steer with A/D or ◀/▶. Hold Space to boost (consumes charge), Shift to brake. Hit neon gates to gain score & refill boost. Avoid obstacles and bots. Switch camera with C. Open Graphics panel with G to tune bloom, SSAO, motion blur, tone mapping, and quality.'));
+
+    function pauseGame(){ if(!running) return; paused=true; overlay.style.pointerEvents='auto'; pausePanel.style.display='block'; }
+    function resumeGame(){ paused=false; overlay.style.pointerEvents='none'; pausePanel.style.display='none'; }
+
+    // Graphics settings wiring
+    bloomStrength.addEventListener('input', ()=>{ bloomPass.strength = parseFloat(bloomStrength.value); });
+    blurStrength.addEventListener('input', ()=>{ afterPass.uniforms['damp'].value = parseFloat(blurStrength.value); });
+    ssaoToggle.addEventListener('change', ()=>{ ssaoPass.enabled = ssaoToggle.checked; });
+    toneSelect.addEventListener('change', ()=>{ applyToneMapping(toneSelect.value); });
+    gfxBtn.addEventListener('click', ()=>{ gfxPanel.style.display = (gfxPanel.style.display==='none'||!gfxPanel.style.display)?'block':'none'; });
+    closeGfx.addEventListener('click', ()=>{ gfxPanel.style.display='none'; });
+
+    qualitySelect.addEventListener('change', ()=>{
+      const q = qualitySelect.value;
+      const dpr = q==='ultra'?Math.min(window.devicePixelRatio,2): q==='high'?Math.min(window.devicePixelRatio,1.5): q==='medium'?1.0: 0.8;
+      renderer.setPixelRatio(dpr);
+      bloomPass.strength = q==='ultra'?1.2: q==='high'?1.0: q==='medium'?0.7:0.5;
+      ssaoPass.enabled = q!=='low'; smaaPass.enabled = q!=='low'; afterPass.uniforms['damp'].value = q==='ultra'?0.9: q==='high'?0.86: q==='medium'?0.7:0.55;
     });
 
-    playBtn.addEventListener('click', startGame);
-    resumeBtn.addEventListener('click', resumeGame);
-    retryBtn.addEventListener('click', startGame);
-    shareBtn.addEventListener('click', async () => {
-      const text = `I scored ${score.toFixed(1)} in Neon Hover Racer 3D!`;
-      if (navigator.share) { try { await navigator.share({ text, title: 'Neon Hover Racer 3D' }); } catch(e){} }
-      else { navigator.clipboard?.writeText(text); alert('Copied: '+text); }
-    });
-    pauseBtn.addEventListener('click', () => paused?resumeGame():pauseGame());
-    resetBtn.addEventListener('click', () => { resetGame(); overlay.style.pointerEvents='auto'; startPanel.style.display='block'; pausePanel.style.display='none'; gameOverPanel.style.display='none'; });
-    document.getElementById('howBtn').addEventListener('click', () => alert('Steer with A/D or ◀/▶. Hold Space to boost (consumes charge), Shift to brake. Hit neon gates to gain score & refill boost. Avoid red obstacles. The track speeds up over time. Switch camera with C. Enjoy!'));
-
-    bloomToggle.addEventListener('change', () => setBloomEnabled(bloomToggle.checked));
-    musicToggle.addEventListener('change', () => setMusicEnabled(musicToggle.checked));
-
-    // ---- Simple Music (WebAudio) ----
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    const audioCtx = new AudioCtx();
-    let musicOn = true; let gateOsc = null;
-    function setMusicEnabled(on){ musicOn = on; if(!on) audioCtx.suspend(); else audioCtx.resume(); }
+    // ---- Audio ----
+    const AudioCtx = window.AudioContext || window.webkitAudioContext; const audioCtx = new AudioCtx(); let musicOn=true;
     function beep(freq, dur=0.08){ if(!musicOn) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type='sawtooth'; osc.frequency.value=freq; gain.gain.value=0.04; osc.connect(gain).connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime+dur); }
 
-    // ---- Gameplay Mechanics ----
-    const tmpBox = new THREE.Box3();
-    const craftBox = new THREE.Box3();
+    // ---- Gameplay ----
+    const tmpBox = new THREE.Box3(); const objBox = new THREE.Box3();
 
-    function update(dt) {
-      if (!running || paused) return;
-      time += dt;
+    function craftUpdate(c, dt, playerControl=false){
+      // difficulty scaling
+      const targetSpeed = Math.min(maxSpeed, (playerControl?6.5:6.0) + time*0.55 + (playerControl?c.score:time*0.2)*0.03);
+      c.speed = THREE.MathUtils.lerp(c.speed, targetSpeed, 0.02);
 
-      // Difficulty scaling
-      const targetSpeed = Math.min(maxSpeed, 6 + time*0.6 + score*0.02);
-      speed = THREE.MathUtils.lerp(speed, targetSpeed, 0.02);
-
-      // Input -> steer
-      const left = keys.has('arrowleft') || keys.has('a');
-      const right = keys.has('arrowright') || keys.has('d');
-      steer = (right?1:0) - (left?1:0);
-
-      // Boost & brake
-      const boosting = keys.has(' ') || keys.has('space');
-      const braking = keys.has('shift');
-      if (boosting && boost>0) { speed += 12*dt; boost = Math.max(0, boost - 0.35*dt); aura.material.color.set(0xf97316); }
-      else if (braking) { speed = Math.max(3, speed - 20*dt); aura.material.color.set(0x67e8f9); }
-      else { aura.material.color.set(0x67e8f9); }
-
-      // Craft hover feel: sway & clamp to track
-      craft.position.x = THREE.MathUtils.clamp(craft.position.x + steer * dt * 6.2, -trackWidth/2+0.6, trackWidth/2-0.6);
-      craft.position.z -= speed * dt; // world moves towards player (negative z)
-      craft.rotation.y = THREE.MathUtils.lerp(craft.rotation.y, -steer*0.25, 0.15);
-      craft.position.y = 0.9 + Math.sin(time*6)*0.03;
-
-      // Move segments forward and recycle
-      segments.forEach(seg => { seg.position.z += speed * dt; });
-      for (let i=0;i<segments.length;i++) {
-        const seg = segments[i];
-        if (seg.position.z > segmentDepth*0.5) {
-          seg.position.z -= segmentDepth*visibleSegments;
-          // add new decor near recycled segment
-          const z = seg.position.z - segmentDepth*0.5;
-          if (Math.random() < 0.6) spawnGate(z);
-          if (Math.random() < 0.6) spawnObstacle(z);
+      // Input
+      let steer = 0;
+      if(playerControl){ const left = keys.has('arrowleft')||keys.has('a'); const right = keys.has('arrowright')||keys.has('d'); steer = (right?1:0)-(left?1:0); const boosting = keys.has(' ')||keys.has('space'); const braking = keys.has('shift'); if(boosting && c.boost>0){ c.speed += 12*dt; c.boost = Math.max(0, c.boost - 0.35*dt); c.aura.material.color.set(0xf97316); } else if(braking){ c.speed = Math.max(3, c.speed - 20*dt); c.aura.material.color.set(0x67e8f9); } else { c.aura.material.color.set(0x67e8f9); } }
+      else { // AI steering behavior: follow midline, avoid obstacles
+        const targetX = THREE.MathUtils.clamp(c.obj.position.x + Math.sin(time*0.6 + c.obj.position.z*0.1)*0.6, -trackWidth/2+0.6, trackWidth/2-0.6);
+        steer = THREE.MathUtils.clamp((targetX - c.obj.position.x)*0.8, -1, 1);
+        // simple obstacle avoidance (look ahead)
+        for(const m of obstacleGroup.children){ if(m.position.z < c.obj.position.z+6 && m.position.z > c.obj.position.z-1){ if(Math.abs(m.position.x - c.obj.position.x) < 1.2){ steer += (m.position.x < c.obj.position.x)?0.9:-0.9; } } }
+        // gate chase for boost
+        for(const g of gateGroup.children){ if(g.position.z < c.obj.position.z+6 && g.position.z > c.obj.position.z-1){ steer += THREE.MathUtils.clamp((g.position.x - c.obj.position.x)*0.6, -0.8, 0.8); }
         }
       }
 
-      // Animate obstacles & move gates/obstacles
-      obstacleGroup.children.forEach(m => {
-        m.userData.phase += dt*1.5;
-        m.position.x = THREE.MathUtils.clamp(m.position.x + Math.sin(m.userData.phase)*0.02, -trackWidth/2+0.6, trackWidth/2-0.6);
-        m.position.z += speed*dt;
-      });
-      gateGroup.children.forEach(g => { g.rotation.z += dt*1.5; g.position.z += speed*dt; });
+      c.obj.position.x = THREE.MathUtils.clamp(c.obj.position.x + steer * dt * 6.5, -trackWidth/2+0.6, trackWidth/2-0.6);
+      c.obj.position.z -= c.speed * dt;
+      c.obj.rotation.y = THREE.MathUtils.lerp(c.obj.rotation.y, -steer*0.25, 0.12);
+      c.obj.position.y = 0.95 + Math.sin(time*6)*0.035;
 
-      // Cull far behind objects
-      obstacleGroup.children = obstacleGroup.children.filter(m => m.position.z < 6);
-      gateGroup.children = gateGroup.children.filter(g => g.position.z < 6);
+      // collisions
+      objBox.setFromObject(c.obj);
+      for(const m of obstacleGroup.children){ tmpBox.setFromObject(m); if(tmpBox.intersectsBox(objBox)){ beep(160,0.15); c.speed *= 0.6; if(playerControl) return raceOver(); else { m.position.z += 8; } } }
+      for(const g of gateGroup.children){ tmpBox.setFromObject(g); if(tmpBox.intersectsBox(objBox)){ c.score += playerControl?4.0:3.0; c.boost = Math.min(1, c.boost + (playerControl?0.45:0.35)); gateGroup.remove(g); beep(440 + Math.random()*220,0.10); } }
 
-      // Collisions
-      craftBox.setFromObject(craft);
-      for (const m of obstacleGroup.children) {
-        tmpBox.setFromObject(m);
-        if (tmpBox.intersectsBox(craftBox)) {
-          beep(160, 0.15); return gameOver();
-        }
-      }
-      for (const g of gateGroup.children) {
-        tmpBox.setFromObject(g);
-        if (tmpBox.intersectsBox(craftBox)) {
-          score += 3.5; boost = Math.min(1, boost + 0.45);
-          gateGroup.remove(g);
-          beep(440 + Math.random()*220, 0.10);
-        }
-      }
-
-      // Scoring over time
-      score += dt * (0.5 + speed*0.03);
-      updateHUD();
+      // scoring over time
+      c.score += dt * (0.5 + c.speed*0.03);
     }
 
-    // ---- Render loop ----
-    let last = performance.now(); let accFps = 0; let fpsFrames=0; let fpsTimer=0;
-    function loop(now) {
-      const dt = Math.min(0.05, (now-last)/1000); last = now;
-      update(dt);
+    // Track movement & decor
+    function advanceWorld(dt){ segments.forEach(seg=>{ seg.position.z += player.speed*dt; }); for(let i=0;i<segments.length;i++){ const seg=segments[i]; if(seg.position.z > segmentDepth*0.5){ seg.position.z -= segmentDepth*visibleSegments; const z = seg.position.z - segmentDepth*0.5; if(Math.random()<0.6) spawnGate(z); if(Math.random()<0.6) spawnObstacle(z); } }
+      obstacleGroup.children.forEach(m=>{ m.userData.phase += dt*1.6; m.position.x = THREE.MathUtils.clamp(m.position.x + Math.sin(m.userData.phase)*0.02, -trackWidth/2+0.6, trackWidth/2-0.6); m.position.z += player.speed*dt; });
+      gateGroup.children.forEach(g=>{ g.rotation.z += dt*1.6; g.position.z += player.speed*dt; });
+      obstacleGroup.children = obstacleGroup.children.filter(m=> m.position.z < 7);
+      gateGroup.children = gateGroup.children.filter(g=> g.position.z < 7);
+    }
+
+    // Position calculation
+    function updatePosition(){ const all = [player, ...bots]; const sorted = all.slice().sort((a,b)=> a.obj.position.z - b.obj.position.z); position = sorted.findIndex(x=>x===player)+1; }
+
+    // Adaptive quality based on FPS
+    let fpsAccum=0, fpsTimer=0, frames=0;
+    function adaptiveQuality(dt){ frames++; fpsTimer+=dt; if(fpsTimer>=0.6){ const fps = Math.round(frames/ fpsTimer); fpsEl.textContent = `FPS: ${fps}`; frames=0; fpsTimer=0; // auto-scale
+        if(fps<30){ qualitySelect.value='medium'; qualitySelect.dispatchEvent(new Event('change')); }
+        if(fps<24){ qualitySelect.value='low'; qualitySelect.dispatchEvent(new Event('change')); }
+        if(fps>55){ qualitySelect.value='high'; qualitySelect.dispatchEvent(new Event('change')); }
+      }
+    }
+
+    // Main loop
+    let last = performance.now();
+    function loop(now){ const dt = Math.min(0.05, (now-last)/1000); last = now; if(running && !paused){ time += dt; craftUpdate(player, dt, true); bots.forEach(b=> craftUpdate(b, dt, false)); advanceWorld(dt); updatePosition(); updateHUD(); }
       updateCamera();
-      setBloomEnabled(bloomToggle.checked);
+      // apply live settings
+      bloomPass.strength = parseFloat(bloomStrength.value);
+      ssaoPass.enabled = ssaoToggle.checked;
+      afterPass.uniforms['damp'].value = parseFloat(blurStrength.value);
       composer.render();
-
-      // FPS
-      accFps += 1; fpsFrames += 1; fpsTimer += dt;
-      if (fpsTimer >= 0.5) { fpsEl.textContent = `FPS: ${Math.round(accFps/0.5)}`; accFps=0; fpsTimer=0; }
-
+      adaptiveQuality(dt);
       requestAnimationFrame(loop);
     }
     requestAnimationFrame(loop);
 
-    // Init world
+    // Init
     initTrack(); regenDecor(); updateHUD();
 
-    // Expose for console debugging
-    window._scene = scene; window._renderer = renderer;
+    // Expose for console
+    window._scene=scene; window._renderer=renderer;
   </script>
 </body>
 </html>
