@@ -1,0 +1,457 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Endless Drive — Slow Roads-style (Three.js)</title>
+<meta name="theme-color" content="#0f1226">
+<style>
+:root{
+  --bg0:#0f1226; --bg1:#0b0f21; --bg2:#0a0c1d;
+  --hud:#eaf4ff; --muted:#a8bed6;
+  --accent:#7fe6ff; --accent2:#ff8fd2;
+  --lane:#cfe6ff;
+  --blur:12px; --pulse:8s;
+}
+/* Base */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; background:linear-gradient(180deg,var(--bg0),var(--bg1) 40%,var(--bg2)); color:var(--hud); font-family:system-ui, Segoe UI, Roboto, Arial, sans-serif; overflow:hidden;}
+/* Canvas */
+#game{position:fixed; inset:0}
+/* HUD */
+.hud{position:fixed; left:10px; right:10px; top:10px; display:flex; gap:8px; align-items:center; z-index:20}
+.panel{padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.25); backdrop-filter:blur(var(--blur))}
+.stats{display:flex; gap:12px; flex-wrap:wrap; font-size:.95rem}
+.stats b{color:#fff}
+.right{margin-left:auto; display:flex; gap:8px}
+button, select, input[type="checkbox"]{color:var(--hud); background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.28); border-radius:12px; padding:8px 10px;}
+button.primary{background:linear-gradient(135deg, rgba(127,230,255,.25), rgba(255,143,210,.25));}
+button:active{transform:translateY(1px)}
+/* Drawer */
+.drawer{position:fixed; right:10px; top:60px; max-width:360px; width:calc(100% - 20px); z-index:30; display:none;}
+.drawer.open{display:block;}
+.row{display:flex; gap:8px; align-items:center; margin:6px 0;}
+.row label{min-width:130px; color:var(--muted)}
+.range{width:100%}
+/* Controls */
+.controls{position:fixed; left:0; right:0; bottom:0; padding:10px; z-index:25; display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.controls .left, .controls .right{display:flex; gap:10px; align-items:center; justify-content:center}
+.ctrl{min-width:70px; min-height:70px; border-radius:16px; display:grid; place-items:center; font-size:18px; user-select:none; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.28); backdrop-filter:blur(10px)}
+.ctrl.big{min-width:120px}
+.ctrl:active{transform:scale(.98)}
+/* Pulse mode */
+@keyframes huePulse{0%{filter:hue-rotate(0deg) saturate(1)}100%{filter:hue-rotate(80deg) saturate(1.25)}}
+.vibrant .panel, .vibrant .ctrl{animation:huePulse var(--pulse) ease-in-out infinite alternate}
+/* Toast */
+.toast{position:fixed; left:50%; transform:translateX(-50%); bottom:180px; padding:10px 14px; border-radius:14px; background:rgba(0,0,0,.45); color:#fff; font-weight:600; border:1px solid rgba(255,255,255,.18); z-index:40; display:none}
+.toast.show{display:block}
+/* Error banner */
+#errorBanner{position:fixed; inset:0; display:none; place-items:center; background:rgba(10,12,24,.7); color:#fff; z-index:100; text-align:center}
+#errorBanner.open{display:grid}
+#errorBanner .card{padding:16px; border-radius:16px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.25)}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="panel stats">
+    <span>Car: <b id="carName">Sprint GT</b></span>
+    <span>Gear: <b id="gear">1</b></span>
+    <span>RPM: <b id="rpm">1200</b></span>
+    <span>Speed: <b id="speed">0</b> km/h</span>
+    <span>Mood: <b id="moodTxt">Day</b></span>
+    <span>Distance: <b id="dist">0.0</b> km</span>
+    <span>Score: <b id="score">0</b></span>
+  </div>
+  <div class="right">
+    <button id="startBtn" class="primary">Start</button>
+    <button id="pauseBtn">Pause</button>
+    <button id="garageBtn">Garage</button>
+  </div>
+</div>
+
+<!-- Drawer (Garage & Settings) -->
+<div class="drawer" id="drawer">
+  <div class="panel">
+    <h4 style="margin:4px 0 6px 0">Garage & Settings</h4>
+    <div class="row">
+      <label>Car</label>
+      <select id="carSelect">
+        <option value="sprint">Sprint GT (balanced)</option>
+        <option value="torque">Torque XR (high accel)</option>
+        <option value="drift">Drift RS (agile)</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>Mood</label>
+      <select id="moodSelect">
+        <option value="day">Day</option>
+        <option value="sunset">Sunset</option>
+        <option value="night">Night</option>
+        <option value="neon">Neon</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>Vibrant Colors</label>
+      <input id="vibrantToggle" type="checkbox" />
+    </div>
+    <div class="row">
+      <label>Sound</label>
+      <input id="soundToggle" type="checkbox" checked />
+    </div>
+    <div class="row">
+      <label>Tilt Steering</label>
+      <input id="tiltToggle" type="checkbox" />
+    </div>
+    <div class="row">
+      <label>Steer Sensitivity</label>
+      <input id="sensRange" class="range" type="range" min="0.6" max="2.0" step="0.1" value="1.0" />
+    </div>
+    <div class="row">
+      <label>Nitro</label>
+      <input id="nitroToggle" type="checkbox" />
+    </div>
+  </div>
+</div>
+
+<!-- Gear controls -->
+<div class="panel" style="position:fixed; right:10px; bottom:120px; z-index:25;">
+  <div>Gear: <b id="gear2">1</b></div>
+  <div style="margin-top:6px; display:flex; gap:6px;">
+    <button id="gearUp">Gear ▲</button>
+    <button id="gearDown">Gear ▼</button>
+  </div>
+</div>
+
+<!-- Mobile controls -->
+<div class="controls">
+  <div class="left">
+    <div class="ctrl" id="leftBtn">⬅️</div>
+    <div class="ctrl" id="rightBtn">➡️</div>
+  </div>
+  <div class="right">
+    <div class="ctrl big" id="gasBtn">ACCEL</div>
+    <div class="ctrl" id="brakeBtn">BRAKE</div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Gear Shift!</div>
+
+<!-- Error banner when libs fail -->
+<div id="errorBanner">
+  <div class="card">
+    <h3>Scripts didn’t load</h3>
+    <p>Three.js or Simplex Noise failed to load.<br/>Please check your internet connection and reload.<br/>If you need offline use, I’ll give you local files.</p>
+  </div>
+</div>
+
+<!-- ✅ Correct CDN script tags -->
+<script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
+<script src="https://unpkg.com/simplex-noise@4.0.1/dist/umd/simplex-noise.min.js"></script>
+
+<script>
+/* Show a friendly banner if libs are missing */
+(function(){
+  if (typeof THREE === 'undefined' || typeof SimplexNoise === 'undefined') {
+    document.getElementById('errorBanner').classList.add('open');
+    console.error('Libraries missing: THREE or SimplexNoise');
+    return;
+  }
+})();
+
+/* ===== Canvas & Scene ===== */
+const canvas = document.getElementById('game');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+const scene = new THREE.Scene();
+let W = window.innerWidth, H = window.innerHeight;
+renderer.setSize(W,H);
+window.addEventListener('resize', ()=>{ W=window.innerWidth; H=window.innerHeight; renderer.setSize(W,H); camera.aspect=W/H; camera.updateProjectionMatrix(); });
+
+/* Fog & Lights */
+scene.fog = new THREE.FogExp2(0x0f1226, 0.012);
+const hemi = new THREE.HemisphereLight(0xffffff, 0x223344, 0.65);
+const dir = new THREE.DirectionalLight(0xffffff, 0.85);
+dir.position.set(10,20,-10);
+scene.add(hemi, dir);
+
+/* Camera */
+const camera = new THREE.PerspectiveCamera(60, W/H, 0.1, 2000);
+camera.position.set(0, 3.6, -6);
+
+/* ===== Input (mobile & tilt) ===== */
+const input = { left:false, right:false, gas:false, brake:false, nitro:false };
+function bindHold(el, key){
+  const down = ()=>{ input[key]=true; if(navigator.vibrate) navigator.vibrate(8); };
+  const up = ()=>{ input[key]=false; };
+  el.addEventListener('touchstart', e=>{ e.preventDefault(); down(); });
+  el.addEventListener('touchend', e=>{ e.preventDefault(); up(); });
+  el.addEventListener('mousedown', down);
+  el.addEventListener('mouseup', up);
+}
+bindHold(document.getElementById('leftBtn'),'left');
+bindHold(document.getElementById('rightBtn'),'right');
+bindHold(document.getElementById('gasBtn'),'gas');
+bindHold(document.getElementById('brakeBtn'),'brake');
+
+/* Optional keyboard */
+window.addEventListener('keydown',(e)=>{
+  if(e.key==='ArrowLeft') input.left=true;
+  if(e.key==='ArrowRight') input.right=true;
+  if(e.key==='ArrowUp') input.gas=true;
+  if(e.key==='ArrowDown') input.brake=true;
+  if(e.key==='n') input.nitro = !input.nitro;
+});
+window.addEventListener('keyup',(e)=>{
+  if(e.key==='ArrowLeft') input.left=false;
+  if(e.key==='ArrowRight') input.right=false;
+  if(e.key==='ArrowUp') input.gas=false;
+  if(e.key==='ArrowDown') input.brake=false;
+});
+
+/* Tilt steering (needs HTTPS + permission on iOS) */
+let tiltEnabled=false, steerSensitivity=1.0;
+async function enableTilt(){
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    try { const res = await DeviceMotionEvent.requestPermission(); if(res !== 'granted') return; } catch(e){ return; }
+  }
+  tiltEnabled = true;
+}
+window.addEventListener('deviceorientation',(e)=>{
+  if(!tiltEnabled) return;
+  const gamma = e.gamma || 0;
+  input.left = gamma < -4;
+  input.right = gamma > 4;
+});
+
+/* ===== Car & Stats ===== */
+const cars = {
+  sprint: { name:'Sprint GT', accel:0.12, brake:0.18, handling:0.9, maxKmh:300, colorA:0x7fe6ff, colorB:0xff8fd2, gear:[3.2,2.5,1.9,1.5,1.25,1.05], nitro:1.25 },
+  torque: { name:'Torque XR', accel:0.18, brake:0.17, handling:0.8, maxKmh:280, colorA:0x7cffb9, colorB:0xffe082, gear:[3.4,2.6,2.0,1.6,1.3,1.1], nitro:1.15 },
+  drift:  { name:'Drift RS',  accel:0.11, brake:0.20, handling:1.15, maxKmh:310, colorA:0x9ba3ff, colorB:0xff92ef, gear:[3.1,2.4,1.85,1.45,1.2,1.0], nitro:1.30 }
+};
+let carKey='sprint'; let car=cars[carKey];
+let gear=1, rpm=1200, speed=0, distance=0, score=0;
+
+/* HUD */
+const $ = id=>document.getElementById(id);
+const carNameEl=$('carName'), gearEl=$('gear'), gear2El=$('gear2'), rpmEl=$('rpm'), speedEl=$('speed'), distEl=$('dist'), scoreEl=$('score'), moodTxt=$('moodTxt');
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 700); }
+function shift(dir){ const prev=gear; gear=Math.max(1,Math.min(6,gear+dir)); if(gear!==prev){ gearEl.textContent=gear; gear2El.textContent=gear; toast('Gear Shift!'); if(dir>0) AudioFX.shiftUp(); else AudioFX.shiftDown(); } }
+$('gearUp').addEventListener('click', ()=>shift(1));
+$('gearDown').addEventListener('click', ()=>shift(-1));
+
+/* ===== WebAudio engine sound (procedural) ===== */
+const AudioFX=(function(){
+  let enabled=true;
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const master=ctx.createGain(); master.gain.value=0.18; master.connect(ctx.destination);
+  const engineOsc=ctx.createOscillator(); engineOsc.type='sawtooth'; const engineGain=ctx.createGain(); engineGain.gain.value=0.0;
+  const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=1200; engineOsc.connect(lp).connect(engineGain).connect(master); engineOsc.start();
+  const rumble=ctx.createOscillator(); rumble.type='triangle'; rumble.frequency.value=22; const rumbleGain=ctx.createGain(); rumbleGain.gain.value=0.0; rumble.connect(rumbleGain).connect(master); rumble.start();
+  async function ensure(){ try{ if(ctx.state!=='running') await ctx.resume(); }catch(e){} }
+  function setRPM(r){ if(!enabled) return; const f=Math.max(60,Math.min(2400,r*0.12)); const vol=Math.max(0.02,Math.min(0.55,r/8000)); engineOsc.frequency.exponentialRampToValueAtTime(f, ctx.currentTime+0.05); engineGain.gain.linearRampToValueAtTime(vol, ctx.currentTime+0.05); lp.frequency.linearRampToValueAtTime(800+r*0.25, ctx.currentTime+0.05); rumbleGain.gain.linearRampToValueAtTime(Math.min(0.25,vol*0.6), ctx.currentTime+0.05); }
+  function blip(freq,type,dur,vol){ const o=ctx.createOscillator(); const g=ctx.createGain(); o.type=type; o.frequency.value=freq; g.gain.value=vol; o.connect(g).connect(master); o.start(); o.stop(ctx.currentTime+dur); }
+  return { enable(){enabled=true; ensure();}, disable(){enabled=false; engineGain.gain.value=0.0; rumbleGain.gain.value=0.0; }, setRPM, shiftUp(){blip(220,'square',0.05,0.12)}, shiftDown(){blip(180,'square',0.06,0.13)}, crash(){blip(110,'sawtooth',0.18,0.25)} };
+})();
+['click','touchstart','keydown'].forEach(evt=>{ window.addEventListener(evt, ()=>{ /* resume ctx via user gesture */ }, {once:true}); });
+
+/* ===== Terrain & Road (procedural) ===== */
+const simplex = new SimplexNoise(Math.random()*1e9);
+
+/* Moods */
+let mood='day';
+function applyMood(){
+  let bg0, bg1, bg2, fogHex;
+  if(mood==='day'){ bg0='#0f1226'; bg1='#0b0f21'; bg2='#0a0c1d'; fogHex=0x0f1226; hemi.intensity=0.65; dir.intensity=0.85; }
+  else if(mood==='sunset'){ bg0='#1b0f26'; bg1='#2b1021'; bg2='#3a1626'; fogHex=0x1b0f26; hemi.intensity=0.6; dir.intensity=0.9; }
+  else if(mood==='night'){ bg0='#060812'; bg1='#090c18'; bg2='#0b0f21'; fogHex=0x090c18; hemi.intensity=0.45; dir.intensity=0.65; }
+  else { bg0='#0a0a12'; bg1='#0b0f26'; bg2='#10163a'; fogHex=0x0b0f26; hemi.intensity=0.7; dir.intensity=0.95; }
+  document.documentElement.style.setProperty('--bg0', bg0);
+  document.documentElement.style.setProperty('--bg1', bg1);
+  document.documentElement.style.setProperty('--bg2', bg2);
+  scene.fog.color.setHex(fogHex);
+  $('moodTxt').textContent = mood.charAt(0).toUpperCase()+mood.slice(1);
+}
+applyMood();
+
+/* Terrain plane */
+const terrainGeom = new THREE.PlaneGeometry(200, 400, 200, 400); // width, depth
+terrainGeom.rotateX(-Math.PI/2);
+const terrainMat = new THREE.MeshStandardMaterial({ color:0x233144, roughness:0.95, metalness:0.0, side: THREE.DoubleSide });
+const terrain = new THREE.Mesh(terrainGeom, terrainMat);
+terrain.position.set(0,-0.4,0);
+scene.add(terrain);
+let terrainOffsetZ = 0;
+
+/* Road ribbon */
+const roadMat = new THREE.MeshStandardMaterial({ color:0x1a1f33, roughness:0.6, metalness:0.1, side: THREE.DoubleSide });
+const laneMat = new THREE.LineBasicMaterial({ color:0xcfe6ff });
+let roadMesh = null, laneLine = null;
+const ROAD_W = 6;
+function genPathPts(startZ, count=80, step=2.5){
+  const pts=[];
+  for(let i=0;i<count;i++){
+    const z = startZ + i*step;
+    const x = 8 * simplex.noise2D(z*0.015, 0.1);
+    const y = 0.0 + 0.4 * simplex.noise2D(z*0.03, 1.7);
+    pts.push(new THREE.Vector3(x, y, z));
+  }
+  return new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.2);
+}
+function buildRoad(startZ){
+  if(roadMesh){ scene.remove(roadMesh); roadMesh.geometry.dispose(); }
+  if(laneLine){ scene.remove(laneLine); laneLine.geometry.dispose(); }
+  const curve = genPathPts(startZ);
+  const segments = 300;
+  const positions = [];
+  const lanePositions = [];
+  for(let i=0;i<=segments;i++){
+    const t = i/segments;
+    const p = curve.getPoint(t);
+    const tangent = curve.getTangent(t).normalize();
+    const normal = new THREE.Vector3(0,1,0);
+    const binormal = new THREE.Vector3().crossVectors(tangent, normal).normalize();
+    const left = new THREE.Vector3().copy(p).addScaledVector(binormal, -ROAD_W/2);
+    const right= new THREE.Vector3().copy(p).addScaledVector(binormal,  ROAD_W/2);
+    positions.push(left.x,left.y,left.z, right.x,right.y,right.z);
+    lanePositions.push(p.x, p.y+0.03, p.z);
+  }
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(positions);
+  const idx = [];
+  for(let i=0;i<segments;i++){
+    const a = i*2, b = a+1, c = a+2, d = a+3;
+    idx.push(a,b,c, b,d,c);
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  geo.setIndex(idx);
+  geo.computeVertexNormals();
+  roadMesh = new THREE.Mesh(geo, roadMat);
+  scene.add(roadMesh);
+  const laneGeo = new THREE.BufferGeometry();
+  laneGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lanePositions),3));
+  laneLine = new THREE.Line(laneGeo, laneMat);
+  scene.add(laneLine);
+}
+buildRoad(0);
+
+/* Player car (low-poly) */
+const carGroup = new THREE.Group();
+{
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.6,0.6,3.2), new THREE.MeshStandardMaterial({color:car.colorA}));
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(1.2,0.35,1.4), new THREE.MeshStandardMaterial({color:car.colorB}));
+  roof.position.y=0.5; roof.position.z=-0.3;
+  const wheelMat = new THREE.MeshStandardMaterial({color:0x111111, roughness:0.6});
+  const wheelGeo = new THREE.CylinderGeometry(0.35,0.35,0.25,16); wheelGeo.rotateZ(Math.PI/2);
+  const w1=new THREE.Mesh(wheelGeo,wheelMat); w1.position.set(-0.7,-0.2,1.2);
+  const w2=w1.clone(); w2.position.x=0.7;
+  const w3=w1.clone(); w3.position.z=-1.2;
+  const w4=w2.clone(); w4.position.z=-1.2;
+  carGroup.add(body, roof, w1,w2,w3,w4);
+}
+scene.add(carGroup);
+
+/* Camera chase */
+let camLerp = 0.12;
+
+/* ===== UI wiring ===== */
+$('garageBtn').addEventListener('click', ()=> $('drawer').classList.toggle('open'));
+$('carSelect').addEventListener('change',(e)=>{ carKey=e.target.value; car=cars[carKey]; carNameEl.textContent=car.name; });
+$('moodSelect').addEventListener('change',(e)=>{ mood=e.target.value; applyMood(); });
+$('vibrantToggle').addEventListener('change',(e)=>{ document.body.classList.toggle('vibrant', e.target.checked); });
+$('soundToggle').addEventListener('change',(e)=>{ if(e.target.checked) AudioFX.enable(); else AudioFX.disable(); });
+$('tiltToggle').addEventListener('change', async (e)=>{ if(e.target.checked){ await enableTilt(); } else { tiltEnabled=false; } });
+$('sensRange').addEventListener('input',(e)=>{ steerSensitivity=parseFloat(e.target.value); });
+$('nitroToggle').addEventListener('change',(e)=>{ input.nitro=e.target.checked; });
+
+/* ===== Game loop ===== */
+let running=false, paused=false, lastTs=0, roadStartZ=0, playerOffset=0;
+$('startBtn').addEventListener('click', ()=>{ if(!running){ resetGame(); running=true; paused=false; lastTs=performance.now(); animate(lastTs); } });
+$('pauseBtn').addEventListener('click', ()=>{ paused=!paused; });
+
+function resetGame(){
+  gear=1; rpm=1200; speed=0; distance=0; score=0; roadStartZ=0; playerOffset=0;
+  buildRoad(roadStartZ);
+}
+
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+/* Initial draw so you see the car immediately */
+drawFrame();
+
+function update(dt){
+  const accel = car.accel * (input.gas?1:0) * (input.nitro?car.nitro:1);
+  const decel = car.brake * (input.brake?1:0);
+  const drag = 0.038 + speed/600;
+  const gearMax = car.maxKmh * (0.45 + (gear-1)*0.1);
+  speed += (accel*100 - decel*140 - drag*60) * dt;
+  speed = clamp(speed, 0, gearMax);
+  const ratio = car.gear[gear-1];
+  rpm = clamp(800 + speed * ratio * 45, 800, 8000);
+  AudioFX.setRPM(rpm);
+  distance += (speed/3600) * dt;
+  score += Math.floor(speed*dt*0.5);
+
+  const steer = car.handling * steerSensitivity;
+  if(input.left) playerOffset = clamp(playerOffset - steer*dt*2.2, -ROAD_W*0.35, ROAD_W*0.35);
+  if(input.right) playerOffset = clamp(playerOffset + steer*dt*2.2, -ROAD_W*0.35, ROAD_W*0.35);
+
+  const advance = speed * dt;
+  const dz = advance * 1000 * 0.02;
+  terrainOffsetZ += dz;
+
+  const pos = terrain.geometry.attributes.position;
+  for(let i=0;i<pos.count;i++){
+    const x = pos.getX(i), z = pos.getZ(i);
+    const h = 0.8 * simplex.noise2D((x+playerOffset)*0.07, (z+terrainOffsetZ)*0.006);
+    pos.setY(i, h);
+  }
+  pos.needsUpdate = true;
+  terrain.geometry.computeVertexNormals();
+
+  roadStartZ += dz;
+  if(roadStartZ > 40){
+    roadStartZ -= 40;
+    buildRoad(roadStartZ);
+  }
+
+  const curve = genPathPts(roadStartZ);
+  const p = curve.getPoint(40/200);
+  const tangent = curve.getTangent(40/200).normalize();
+  const binormal = new THREE.Vector3().crossVectors(tangent, new THREE.Vector3(0,1,0)).normalize();
+  const carPos = new THREE.Vector3().copy(p).addScaledVector(binormal, playerOffset);
+  carGroup.position.copy(carPos);
+  carGroup.position.y += 0.25;
+  carGroup.lookAt(p.clone().add(tangent));
+
+  const targetCam = carPos.clone().add(new THREE.Vector3(0, 3.4, -6));
+  camera.position.lerp(targetCam, camLerp);
+  const lookAt = carPos.clone().add(new THREE.Vector3(0,0.3,2));
+  camera.lookAt(lookAt);
+
+  carNameEl.textContent = car.name;
+  gearEl.textContent = gear; gear2El.textContent = gear;
+  rpmEl.textContent = Math.floor(rpm);
+  speedEl.textContent = Math.floor(speed);
+  distEl.textContent = distance.toFixed(1);
+  scoreEl.textContent = score;
+}
+
+function drawFrame(){
+  renderer.render(scene, camera);
+}
+
+function animate(ts){
+  if(!running) return;
+  const dt = Math.min(0.033, (ts - lastTs)/1000); lastTs = ts;
+  if(!paused){ update(dt); drawFrame(); }
+  requestAnimationFrame(animate);
+}
+</script>
+</body>
+</html>
