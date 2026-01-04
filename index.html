@@ -149,11 +149,15 @@ button:active{transform:translateY(1px)}
   </div>
 </div>
 
-<!-- ✅ Correct CDN script tags -->
+<!-- ✅ Correct CDN script tags (must be EXACTLY like this) -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/simplex-noise@4.0.1/dist/umd/simplex-noise.min.js"></script>
 
 <script>
+/* Quick diagnostics — you should see these two logs */
+console.log('THREE loaded?', typeof THREE);
+console.log('SimplexNoise loaded?', typeof SimplexNoise);
+
 /* Show a friendly banner if libs are missing */
 (function(){
   if (typeof THREE === 'undefined' || typeof SimplexNoise === 'undefined') {
